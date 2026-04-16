@@ -64,7 +64,7 @@ resource "aws_route_table" "public_rt" {
 }
 
 resource "aws_route_table_association" "public_rt_association" {
-    subnet_id = [ aws_subnet.public-1a.id, aws_subnet_public.public1b.id ]
+    subnet_id = [ aws_subnet.public-1a.id, aws_subnet.public-1b.id ]
     route_table_id = aws_route_table.public_rt.id
   
 }
