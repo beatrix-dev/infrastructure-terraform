@@ -63,11 +63,18 @@ resource "aws_route_table" "public_rt" {
   
 }
 
-resource "aws_route_table_association" "public_rt_association" {
-    subnet_id = [ aws_subnet.public-1a.id, aws_subnet.public-1b.id ]
+resource "aws_route_table_association" "public_rt_association_1a" {
+    subnet_id = aws_subnet.public-1a.id
     route_table_id = aws_route_table.public_rt.id
   
 }
+
+resource "aws_route_table_association" "public_rt_association_1b" {
+    subnet_id = aws_subnet.public-1b.id
+    route_table_id = aws_route_table.public_rt.id
+}
+
+
 
 resource "aws_network_acl" "public_nacl" {
     vpc_id = aws_vpc.vpc.id
