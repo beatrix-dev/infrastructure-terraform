@@ -1,0 +1,19 @@
+# Local .terraform directories
+**/.terraform/*
+
+# Terraform state files
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+
+# Terraform variable files that may contain secrets
+*.tfvars
+*.tfvars.json
+
+# Crash log files
+crash.log
+crash.*.log
+
+# Lock file — this one we DO want to commit
+# so remove it from gitignore if present
+# !.terraform.lock.hcl
