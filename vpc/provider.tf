@@ -10,3 +10,11 @@ terraform {
 provider "aws" {
 region = "eu-west-1"
 }
+
+terraform {
+  backend "s3" {
+    bucket = "romano-terraform-state-727646468320-eu-west-1-an"
+    key    = "beatrix"
+    region = "eu-west-1"
+  }
+}
