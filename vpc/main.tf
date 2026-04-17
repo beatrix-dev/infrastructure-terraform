@@ -28,12 +28,12 @@ resource "aws_subnet" "public_1a" {
   }
 }
 
-resource "aws_subnet" "public-1a" {
+resource "aws_subnet" "public_1b" {
     vpc_id = aws_vpc.vpc.id
-    cidr_block = "${var.cidr}.1.0/24"
-    availability_zone = "eu-west-1a"
+    cidr_block = "${var.cidr}.2.0/24"
+    availability_zone = "eu-west-1b"
         tags = {
-      Name = "${var.client}-public1b"
+      Name = "${var.client}-public-1b"
     }
 }
 
