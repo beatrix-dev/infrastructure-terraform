@@ -14,7 +14,7 @@ region = "eu-west-1"
 terraform {
   backend "s3" {
     bucket = "romano-terraform-state-727646468320-eu-west-1-an"
-    key    = "beatrix/"
+    key    = "beatrix/vpc/terraform.tfstate"
     region = "eu-west-1"
   }
 }
