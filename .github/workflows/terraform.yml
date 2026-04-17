@@ -3,21 +3,49 @@ name: Terraform Infrastructure
 on:
   push:
     branches:
-      - main          # apply runs on merge to main
+      - main
   pull_request:
     branches:
-      - main          # plan runs on every pull request
+      - main
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action to perform'
+        required: true
+        default: 'plan'
+        type: choice
+        options:
+          - plan
+          - apply
+          - destroy
+      component:
+        description: 'Component to target'
+        required: true
+        type: choice
+        options:
+          - vpc
+          - rds
+          - all
 
 env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
 
 jobs:
+
+  # ─────────────────────────────────────────
+  # VPC JOB — runs on push/PR to main
+  # skipped when workflow_dispatch targets rds only
+  # ─────────────────────────────────────────
   terraform-vpc:
     name: VPC
     runs-on: ubuntu-latest
+    if: |
+      github.event_name != 'workflow_dispatch' ||
+      github.event.inputs.component == 'vpc' ||
+      github.event.inputs.component == 'all'
     defaults:
       run:
-        working-directory: vpc    # runs all commands inside vpc/
+        working-directory: vpc
 
     steps:
       - name: Checkout code
@@ -33,12 +61,12 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.14.8   # matches your current version
+          terraform_version: 1.14.8
 
       - name: Terraform Format check
         id: fmt
         run: terraform fmt -check
-        continue-on-error: true       # warns but doesn't fail the pipeline
+        continue-on-error: true
 
       - name: Terraform Init
         id: init
@@ -46,12 +74,17 @@ jobs:
 
       - name: Terraform Validate
         id: validate
-        run: terraform validate       # checks syntax without hitting AWS
+        run: terraform validate
 
       - name: Terraform Plan
         id: plan
+        if: |
+          github.event_name == 'pull_request' ||
+          github.event_name == 'push' ||
+          github.event.inputs.action == 'plan' ||
+          github.event.inputs.action == 'apply'
         run: terraform plan -no-color -out=tfplan
-        continue-on-error: true       # plan can show changes without failing
+        continue-on-error: true
 
       - name: Post plan to PR
         uses: actions/github-script@v7
@@ -70,5 +103,137 @@ jobs:
             })
 
       - name: Terraform Apply
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        if: |
+          (github.ref == 'refs/heads/main' && github.event_name == 'push') ||
+          github.event.inputs.action == 'apply'
         run: terraform apply -auto-approve -input=false tfplan
+
+      - name: Terraform Destroy
+        if: github.event.inputs.action == 'destroy'
+        run: terraform destroy -auto-approve
+
+  # ─────────────────────────────────────────
+  # RDS JOB — runs after VPC on push/PR
+  # skipped when workflow_dispatch targets vpc only
+  # ─────────────────────────────────────────
+  terraform-rds:
+    name: RDS
+    runs-on: ubuntu-latest
+    needs: terraform-vpc       # always waits for VPC job first
+    if: |
+      github.event_name != 'workflow_dispatch' ||
+      github.event.inputs.component == 'rds' ||
+      github.event.inputs.component == 'all'
+    defaults:
+      run:
+        working-directory: rds
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region:            ${{ secrets.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.14.8
+
+      - name: Terraform Format check
+        id: fmt
+        run: terraform fmt -check
+        continue-on-error: true
+
+      - name: Terraform Init
+        id: init
+        run: terraform init
+
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        id: plan
+        if: |
+          github.event_name == 'pull_request' ||
+          github.event_name == 'push' ||
+          github.event.inputs.action == 'plan' ||
+          github.event.inputs.action == 'apply'
+        run: terraform plan -no-color -out=tfplan
+        continue-on-error: true
+
+      - name: Post plan to PR
+        uses: actions/github-script@v7
+        if: github.event_name == 'pull_request'
+        with:
+          script: |
+            const output = `#### RDS Terraform Plan
+            \`\`\`
+            ${{ steps.plan.outputs.stdout }}
+            \`\`\``;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
+
+      - name: Terraform Apply
+        if: |
+          (github.ref == 'refs/heads/main' && github.event_name == 'push') ||
+          github.event.inputs.action == 'apply'
+        run: terraform apply -auto-approve -input=false tfplan
+
+      - name: Terraform Destroy
+        if: github.event.inputs.action == 'destroy'
+        run: terraform destroy -auto-approve
+
+  # ─────────────────────────────────────────
+  # DESTROY ALL JOB — only runs when
+  # workflow_dispatch action=destroy component=all
+  # destroys in reverse order — RDS first then VPC
+  # ─────────────────────────────────────────
+  terraform-destroy-all:
+    name: Destroy All
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'workflow_dispatch' &&
+      github.event.inputs.action == 'destroy' &&
+      github.event.inputs.component == 'all'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region:            ${{ secrets.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.14.8
+
+      - name: Terraform Init — RDS
+        working-directory: rds
+        run: terraform init
+
+      - name: Destroy RDS first
+        working-directory: rds
+        run: terraform destroy -auto-approve
+
+      - name: Terraform Init — VPC
+        working-directory: vpc
+        run: terraform init
+
+      - name: Destroy VPC second
+        working-directory: vpc
+        run: terraform destroy -auto-approve
