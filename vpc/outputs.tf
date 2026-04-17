@@ -12,7 +12,7 @@ output "public_subnet_ids" {
 output "private_subnet_ids" {
   value = {
    private_subnet_1a = aws_subnet.private_1a.id,
-   private_subnet_1a = aws_subnet.private_1b.id
+   private_subnet_1b = aws_subnet.private_1b.id
   }
 }
 
