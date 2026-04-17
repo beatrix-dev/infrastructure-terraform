@@ -1,5 +1,5 @@
 terraform {
-    backend "s3" {
+  backend "s3" {
     bucket = "romano-terraform-state-727646468320-eu-west-1-an"
     key    = "beatrix/vpc/terraform.tfstate"
     region = "eu-west-1"
@@ -14,6 +14,6 @@ terraform {
 }
 
 provider "aws" {
-region = "eu-west-1"
+  region = "eu-west-1"
 }
 
