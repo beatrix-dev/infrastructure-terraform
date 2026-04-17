@@ -133,7 +133,7 @@ resource "aws_route_table_association" "public_rt_association_1b" {
 
 
 
-resource "aws_network_acl" "public_nacl" {
+resource "aws_network_acl" "private_nacl" {
     vpc_id = aws_vpc.vpc.id
 
   
