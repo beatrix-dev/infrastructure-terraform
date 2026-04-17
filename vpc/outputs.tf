@@ -1,5 +1,5 @@
 output "vpc" {
-value = aws_vpc.vpc.id
+  value = aws_vpc.vpc.id
 }
 
 output "public_subnet_ids" {
@@ -15,6 +15,7 @@ output "private_subnet_ids" {
    private_subnet_1a = aws_subnet.private_1b.id
   }
 }
+
 
 /* 
 
