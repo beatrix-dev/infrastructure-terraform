@@ -1,8 +1,8 @@
 terraform {
   required_providers {
     aws = {
-        source = "hashicorp/aws"
-        version = "6.40.0"
+      source  = "hashicorp/aws"
+      version = "6.40.0"
     }
   }
 }
@@ -14,7 +14,7 @@ region = "eu-west-1"
 terraform {
   backend "s3" {
     bucket = "romano-terraform-state-727646468320-eu-west-1-an"
-    key    = "beatrix"
+    key    = "beatrix/"
     region = "eu-west-1"
   }
 }

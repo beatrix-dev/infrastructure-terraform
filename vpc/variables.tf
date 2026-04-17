@@ -1,11 +1,11 @@
 variable "client" {
-    default = "beatrix"
-  
+  default = "beatrix"
+
 }
 
 variable "env" {
-    default = "preprod"
-  
+  default = "preprod"
+
 }
 variable "cidr" {
   default = "10.10"
