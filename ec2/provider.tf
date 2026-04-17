@@ -18,6 +18,5 @@ data "terraform_remote_state" "vpc" {
     bucket  = "romano-terraform-state-727646468320-eu-west-1-an"
     key     = "beatrix/vpc/terraform.tfstate"
     region  = "eu-west-1"
-    profile = "romano_training_account_2"
   }
 }
