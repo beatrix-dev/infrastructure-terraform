@@ -118,7 +118,7 @@ jobs:
   #_______________________________
 
   terraform-ec2:
-    name: VPC
+    name: EC2
     runs-on: ubuntu-latest
     if: |
       github.event_name != 'workflow_dispatch' ||

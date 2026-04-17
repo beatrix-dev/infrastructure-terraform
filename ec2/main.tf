@@ -20,8 +20,8 @@ data "aws_ami" "al2023" {
 /* ------ EC2 Instance Config */
 
 resource "aws_instance" "amazon_linux_instance" {
-  subnet_id = aws_subnet.public_1a.id
-  ami = data.aws_ami.al2023
+  subnet_id = data.terraform_remote_state.vpc.outputs.public_1a.id
+  ami = data.aws_ami.al2023.id
   instance_type = "t3.micro"
   tags = {
     Name = "my-instance"
