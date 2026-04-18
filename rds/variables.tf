@@ -27,7 +27,7 @@ variable "password" {
 }
 
 variable "parameter_group_name" {
-  default = "default.mysql8.0"
+  default = "default.mysql8.4"
 }
 
 variable "skip_final_snapshot" {
