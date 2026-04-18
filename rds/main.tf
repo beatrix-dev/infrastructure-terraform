@@ -9,6 +9,7 @@ resource "aws_db_instance" "rds_instance" {
   parameter_group_name = var.parameter_group_name
   skip_final_snapshot  = var.skip_final_snapshot
   storage_encrypted    = true
+  db_subnet_group_name = aws_db_subnet_group.rds_subnet.name
 }
 
 

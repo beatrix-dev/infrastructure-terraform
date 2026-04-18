@@ -1,17 +1,17 @@
- variable storage {
-    default = 40
- } 
+variable "storage" {
+  default = 40
+}
 
- variable "databaseName" {
-   default = "beatrix"
- }
+variable "databaseName" {
+  default = "beatrix"
+}
 
 variable "engine" {
   default = "mysql"
 }
 
 variable "engine_version" {
-default = "8.4.3"  
+  default = "8.4.3"
 }
 
 variable "instance_size" {
