@@ -13,7 +13,8 @@ resource "aws_db_instance" "rds_instance" {
 
 resource "aws_db_subnet_group" "rds_subnet" {
   name       = "main"
-  subnet_ids = values(data.terraform_remote_state.vpc.outputs.private_subnets)
+  subnet_ids = values(data.terraform_remote_state.vpc.outputs.private_subnet_ids)
+
 
   tags = {
     Name = "My DB subnet group"
